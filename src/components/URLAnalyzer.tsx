@@ -1,19 +1,18 @@
 import { useState } from "react";
-import { Shield, Search, AlertTriangle, CheckCircle, XCircle } from "lucide-react";
-import { analyzeURL, type AnalysisResult } from "@/lib/phishing-engine";
+import { Shield, Search, AlertTriangle, CheckCircle, XCircle, Globe, Mail, Server, HelpCircle } from "lucide-react";
+import { analyzeInput, type AnalysisResult, type InputType } from "@/lib/phishing-engine";
 
 const URLAnalyzer = () => {
-  const [url, setUrl] = useState("");
+  const [input, setInput] = useState("");
   const [result, setResult] = useState<AnalysisResult | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
 
   const handleAnalyze = () => {
-    if (!url.trim()) return;
+    if (!input.trim()) return;
     setIsAnalyzing(true);
     setResult(null);
-    // Simulate processing delay
     setTimeout(() => {
-      setResult(analyzeURL(url.trim()));
+      setResult(analyzeInput(input.trim()));
       setIsAnalyzing(false);
     }, 1200);
   };
@@ -40,32 +39,53 @@ const URLAnalyzer = () => {
     return "bg-danger";
   };
 
+  const getInputTypeIcon = (type: InputType) => {
+    switch (type) {
+      case "url": return <Globe className="w-4 h-4" />;
+      case "email": return <Mail className="w-4 h-4" />;
+      case "domain": return <Server className="w-4 h-4" />;
+      default: return <HelpCircle className="w-4 h-4" />;
+    }
+  };
+
+  const getInputTypeLabel = (type: InputType) => {
+    switch (type) {
+      case "url": return "URL";
+      case "email": return "Email Address";
+      case "domain": return "Domain";
+      default: return "Unknown Input";
+    }
+  };
+
   return (
     <section className="w-full max-w-3xl mx-auto">
       {/* Input area */}
       <div className="bg-card border border-border rounded-lg p-6 glow-green">
         <div className="flex items-center gap-2 mb-4">
           <Shield className="w-5 h-5 text-primary" />
-          <h2 className="font-mono text-sm text-primary tracking-wider uppercase">URL Scanner</h2>
+          <h2 className="font-mono text-sm text-primary tracking-wider uppercase">Threat Scanner</h2>
         </div>
         <div className="flex gap-3">
           <input
             type="text"
-            value={url}
-            onChange={(e) => setUrl(e.target.value)}
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && handleAnalyze()}
-            placeholder="Enter URL to analyze (e.g., http://suspicious-site.tk/login)"
+            placeholder="Enter URL, email, or domain to analyze..."
             className="flex-1 bg-muted border border-border rounded-md px-4 py-3 font-mono text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary/50"
           />
           <button
             onClick={handleAnalyze}
-            disabled={!url.trim() || isAnalyzing}
+            disabled={!input.trim() || isAnalyzing}
             className="bg-primary text-primary-foreground px-6 py-3 rounded-md font-mono text-sm font-semibold hover:opacity-90 transition-opacity disabled:opacity-40 flex items-center gap-2"
           >
             <Search className="w-4 h-4" />
             {isAnalyzing ? "Scanning..." : "Analyze"}
           </button>
         </div>
+        <p className="font-mono text-xs text-muted-foreground mt-2">
+          Supports URLs, email addresses, and domain names
+        </p>
       </div>
 
       {/* Scanning animation */}
@@ -74,7 +94,7 @@ const URLAnalyzer = () => {
           <div className="absolute inset-0 scanline opacity-50" />
           <div className="absolute inset-0 bg-primary/5 animate-scan" />
           <p className="text-center font-mono text-primary animate-pulse-glow text-sm">
-            ⟫ Analyzing URL against security rules...
+            ⟫ Analyzing input against security rules...
           </p>
         </div>
       )}
@@ -113,10 +133,15 @@ const URLAnalyzer = () => {
             />
           </div>
 
-          {/* Analyzed URL */}
+          {/* Analyzed input */}
           <div className="bg-muted rounded-md p-3 mb-6">
-            <p className="text-xs text-muted-foreground font-mono mb-1">Analyzed URL:</p>
-            <p className="font-mono text-sm text-foreground break-all">{result.url}</p>
+            <div className="flex items-center gap-2 mb-1">
+              <span className="text-primary">{getInputTypeIcon(result.inputType)}</span>
+              <p className="text-xs text-muted-foreground font-mono">
+                Detected as: <span className="text-primary font-semibold">{getInputTypeLabel(result.inputType)}</span>
+              </p>
+            </div>
+            <p className="font-mono text-sm text-foreground break-all">{result.input}</p>
           </div>
 
           {/* Rules */}
