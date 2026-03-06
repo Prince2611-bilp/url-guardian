@@ -7,8 +7,11 @@ export interface AnalysisRule {
   triggered: boolean;
 }
 
+export type InputType = "url" | "email" | "domain" | "unknown";
+
 export interface AnalysisResult {
-  url: string;
+  input: string;
+  inputType: InputType;
   riskScore: number;
   classification: "Legitimate" | "Suspicious" | "Phishing";
   rules: AnalysisRule[];
