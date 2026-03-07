@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Shield, Search, AlertTriangle, CheckCircle, XCircle } from "lucide-react";
 import { analyzeURL, detectThreatType, THREAT_TYPE_LABELS, type AnalysisResult } from "@/lib/phishing-engine";
 
@@ -6,11 +6,27 @@ const URLAnalyzer = () => {
   const [url, setUrl] = useState("");
   const [result, setResult] = useState<AnalysisResult | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [livePreview, setLivePreview] = useState<AnalysisResult | null>(null);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Live preview as user types
+  useEffect(() => {
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    if (!url.trim() || url.trim().length < 3) {
+      setLivePreview(null);
+      return;
+    }
+    debounceRef.current = setTimeout(() => {
+      setLivePreview(analyzeURL(url.trim()));
+    }, 300);
+    return () => { if (debounceRef.current) clearTimeout(debounceRef.current); };
+  }, [url]);
 
   const handleAnalyze = () => {
     if (!url.trim()) return;
     setIsAnalyzing(true);
     setResult(null);
+    setLivePreview(null);
     setTimeout(() => {
       setResult(analyzeURL(url.trim()));
       setIsAnalyzing(false);
