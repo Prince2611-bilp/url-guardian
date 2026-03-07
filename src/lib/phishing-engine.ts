@@ -111,17 +111,52 @@ function hasEncodedChars(url: string): boolean {
 
 // --- Input type detection ---
 
+const SMS_KEYWORDS = [
+  "urgent", "immediately", "now", "asap", "expires", "limited time", "act fast", "hurry",
+  "won", "winner", "prize", "free", "gift", "cash", "money", "bank", "credit", "debit",
+  "refund", "payment", "ssn", "social security", "pin", "otp", "code", "verify your",
+  "confirm your", "click here", "claim", "congratulations", "selected", "lucky",
+  "bit.ly", "tinyurl", "goo.gl", "shorturl", "suspended", "blocked", "unusual activity",
+  "text message", "sms", "txt",
+];
+
+const CLONE_KEYWORDS = [
+  "login", "signin", "sign-in", "verify", "confirm", "account", "password", "auth",
+];
+
 export function detectThreatType(input: string): ThreatType {
   const trimmed = input.trim().toLowerCase();
-  // SMS: starts with + or contains phone-like patterns with message text
-  if (/^(\+?\d[\d\s\-()]{7,})/.test(trimmed) || /\b(sms|text message|txt)\b/.test(trimmed)) return "sms";
-  // Email: contains @, looks like email
-  if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed)) return "email";
-  // URL: contains protocol or path
-  if (/^https?:\/\//.test(trimmed) || /\//.test(trimmed)) return "url";
-  // Domain: just a domain-like string
+
+  // Email: contains @ with domain-like structure
+  if (/[^\s@]+@[^\s@]+\.[^\s@]+/.test(trimmed)) return "email";
+
+  // SMS: phone patterns, or multi-word messages with urgency/financial keywords
+  if (/^(\+?\d[\d\s\-()]{7,})/.test(trimmed)) return "sms";
+  const hasSpaces = trimmed.includes(" ");
+  const smsKeywordCount = SMS_KEYWORDS.filter(kw => trimmed.includes(kw)).length;
+  if (hasSpaces && smsKeywordCount >= 1) return "sms";
+
+  // Clone website: URL-like with login/credential harvesting paths
+  const isURLLike = /^https?:\/\//.test(trimmed) || /\//.test(trimmed);
+  if (isURLLike) {
+    const cloneKeywordCount = CLONE_KEYWORDS.filter(kw => trimmed.includes(kw)).length;
+    const hasBrandMimic = LEGITIMATE_DOMAINS.some(ld => {
+      const base = ld.split(".")[0];
+      return trimmed.includes(base) && !trimmed.includes(ld);
+    });
+    const hasIP = hasIPAddress(trimmed);
+    if ((cloneKeywordCount >= 1 && hasBrandMimic) || (hasIP && cloneKeywordCount >= 1) || (hasBrandMimic && hasIP)) {
+      return "clone";
+    }
+    return "url";
+  }
+
+  // Domain: plain domain-like string
   if (/^[a-z0-9]([a-z0-9-]*[a-z0-9])?(\.[a-z]{2,})+$/.test(trimmed)) return "domain";
-  // Default to URL
+
+  // Multi-word without URL structure → likely SMS
+  if (hasSpaces) return "sms";
+
   return "url";
 }
 
