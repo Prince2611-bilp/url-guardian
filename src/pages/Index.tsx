@@ -35,12 +35,12 @@ const Index = () => {
               Cybersecurity Project
             </p>
             <h2 className="text-2xl sm:text-3xl font-bold text-foreground mb-3 font-mono">
-              Detect Phishing URLs Instantly
+              Detect Phishing Threats Instantly
             </h2>
             <p className="text-sm text-muted-foreground max-w-lg mx-auto">
-              Paste any URL below to analyze it against 10 security rules.
-              The tool calculates a risk score and classifies the link as
-              Legitimate, Suspicious, or Phishing.
+              Paste any URL, email address, domain, or SMS message below.
+              The tool auto-detects the threat type, analyzes it against security rules,
+              and classifies it as Legitimate, Suspicious, or Phishing.
             </p>
           </div>
 
