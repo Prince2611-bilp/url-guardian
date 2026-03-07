@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Shield, Search, AlertTriangle, CheckCircle, XCircle } from "lucide-react";
 import { analyzeURL, detectThreatType, THREAT_TYPE_LABELS, type AnalysisResult } from "@/lib/phishing-engine";
 
@@ -6,11 +6,27 @@ const URLAnalyzer = () => {
   const [url, setUrl] = useState("");
   const [result, setResult] = useState<AnalysisResult | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [livePreview, setLivePreview] = useState<AnalysisResult | null>(null);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Live preview as user types
+  useEffect(() => {
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    if (!url.trim() || url.trim().length < 3) {
+      setLivePreview(null);
+      return;
+    }
+    debounceRef.current = setTimeout(() => {
+      setLivePreview(analyzeURL(url.trim()));
+    }, 300);
+    return () => { if (debounceRef.current) clearTimeout(debounceRef.current); };
+  }, [url]);
 
   const handleAnalyze = () => {
     if (!url.trim()) return;
     setIsAnalyzing(true);
     setResult(null);
+    setLivePreview(null);
     setTimeout(() => {
       setResult(analyzeURL(url.trim()));
       setIsAnalyzing(false);
@@ -71,6 +87,44 @@ const URLAnalyzer = () => {
           <p className="mt-2 font-mono text-xs text-muted-foreground">
             Auto-detected type: <span className="text-primary font-semibold">{THREAT_TYPE_LABELS[detectedType]}</span>
           </p>
+        )}
+
+        {/* Live preview as user types */}
+        {livePreview && !isAnalyzing && !result && (
+          <div className="mt-3 bg-muted/50 border border-border rounded-md p-3 space-y-2">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                {livePreview.classification === "Legitimate" && <CheckCircle className="w-4 h-4 text-safe" />}
+                {livePreview.classification === "Suspicious" && <AlertTriangle className="w-4 h-4 text-warning" />}
+                {livePreview.classification === "Phishing" && <XCircle className="w-4 h-4 text-danger" />}
+                <span className={`font-mono text-sm font-bold ${getClassColor(livePreview.classification)}`}>
+                  {livePreview.classification}
+                </span>
+                <span className="font-mono text-xs text-muted-foreground">
+                  — {THREAT_TYPE_LABELS[livePreview.threatType]}
+                </span>
+              </div>
+              <span className={`font-mono text-sm font-bold ${getClassColor(livePreview.classification)}`}>
+                {livePreview.riskScore}%
+              </span>
+            </div>
+            <div className="w-full bg-muted rounded-full h-1.5">
+              <div
+                className={`h-1.5 rounded-full transition-all duration-500 ${getRiskBarColor(livePreview.riskScore)}`}
+                style={{ width: `${livePreview.riskScore}%` }}
+              />
+            </div>
+            {livePreview.rules.filter(r => r.triggered).length > 0 && (
+              <div className="flex flex-wrap gap-1.5 pt-1">
+                {livePreview.rules.filter(r => r.triggered).map((rule, i) => (
+                  <span key={i} className="inline-flex items-center gap-1 bg-danger/10 text-danger font-mono text-[10px] px-2 py-0.5 rounded border border-danger/20">
+                    <XCircle className="w-2.5 h-2.5" /> {rule.name}
+                  </span>
+                ))}
+              </div>
+            )}
+            <p className="font-mono text-[10px] text-muted-foreground">Press Enter or click Analyze for full report</p>
+          </div>
         )}
       </div>
 
