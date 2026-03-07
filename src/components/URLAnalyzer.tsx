@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Shield, Search, AlertTriangle, CheckCircle, XCircle } from "lucide-react";
-import { analyzeURL, type AnalysisResult } from "@/lib/phishing-engine";
+import { analyzeURL, detectThreatType, THREAT_TYPE_LABELS, type AnalysisResult } from "@/lib/phishing-engine";
 
 const URLAnalyzer = () => {
   const [url, setUrl] = useState("");
@@ -11,7 +11,6 @@ const URLAnalyzer = () => {
     if (!url.trim()) return;
     setIsAnalyzing(true);
     setResult(null);
-    // Simulate processing delay
     setTimeout(() => {
       setResult(analyzeURL(url.trim()));
       setIsAnalyzing(false);
@@ -40,13 +39,15 @@ const URLAnalyzer = () => {
     return "bg-danger";
   };
 
+  const detectedType = url.trim() ? detectThreatType(url.trim()) : null;
+
   return (
     <section className="w-full max-w-3xl mx-auto">
       {/* Input area */}
       <div className="bg-card border border-border rounded-lg p-6 glow-green">
         <div className="flex items-center gap-2 mb-4">
           <Shield className="w-5 h-5 text-primary" />
-          <h2 className="font-mono text-sm text-primary tracking-wider uppercase">URL Scanner</h2>
+          <h2 className="font-mono text-sm text-primary tracking-wider uppercase">Universal Threat Scanner</h2>
         </div>
         <div className="flex gap-3">
           <input
@@ -54,7 +55,7 @@ const URLAnalyzer = () => {
             value={url}
             onChange={(e) => setUrl(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && handleAnalyze()}
-            placeholder="Enter URL to analyze (e.g., http://suspicious-site.tk/login)"
+            placeholder="Enter URL, email, domain, or SMS message to analyze..."
             className="flex-1 bg-muted border border-border rounded-md px-4 py-3 font-mono text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary/50"
           />
           <button
@@ -66,6 +67,11 @@ const URLAnalyzer = () => {
             {isAnalyzing ? "Scanning..." : "Analyze"}
           </button>
         </div>
+        {detectedType && !isAnalyzing && !result && (
+          <p className="mt-2 font-mono text-xs text-muted-foreground">
+            Auto-detected type: <span className="text-primary font-semibold">{THREAT_TYPE_LABELS[detectedType]}</span>
+          </p>
+        )}
       </div>
 
       {/* Scanning animation */}
@@ -74,7 +80,7 @@ const URLAnalyzer = () => {
           <div className="absolute inset-0 scanline opacity-50" />
           <div className="absolute inset-0 bg-primary/5 animate-scan" />
           <p className="text-center font-mono text-primary animate-pulse-glow text-sm">
-            ⟫ Analyzing URL against security rules...
+            ⟫ Analyzing against {THREAT_TYPE_LABELS[detectThreatType(url.trim())]} rules...
           </p>
         </div>
       )}
@@ -82,6 +88,13 @@ const URLAnalyzer = () => {
       {/* Results */}
       {result && !isAnalyzing && (
         <div className={`mt-6 bg-card border rounded-lg p-6 ${getGlowClass(result.classification)}`}>
+          {/* Threat type badge */}
+          <div className="mb-4">
+            <span className="inline-block bg-primary/10 text-primary font-mono text-xs px-3 py-1 rounded-full border border-primary/20">
+              {THREAT_TYPE_LABELS[result.threatType]}
+            </span>
+          </div>
+
           {/* Classification header */}
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-3">
@@ -113,9 +126,9 @@ const URLAnalyzer = () => {
             />
           </div>
 
-          {/* Analyzed URL */}
+          {/* Analyzed input */}
           <div className="bg-muted rounded-md p-3 mb-6">
-            <p className="text-xs text-muted-foreground font-mono mb-1">Analyzed URL:</p>
+            <p className="text-xs text-muted-foreground font-mono mb-1">Analyzed Input:</p>
             <p className="font-mono text-sm text-foreground break-all">{result.url}</p>
           </div>
 
