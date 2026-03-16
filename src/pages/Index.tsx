@@ -1,6 +1,7 @@
 import { Shield, Terminal } from "lucide-react";
 import URLAnalyzer from "@/components/URLAnalyzer";
 import PhishingTypes from "@/components/PhishingTypes";
+import ProjectReport from "@/components/ProjectReport";
 
 const Index = () => {
   return (
