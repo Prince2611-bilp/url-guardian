@@ -1,6 +1,7 @@
 import { Shield, Terminal } from "lucide-react";
 import URLAnalyzer from "@/components/URLAnalyzer";
 import PhishingTypes from "@/components/PhishingTypes";
+import ProjectReport from "@/components/ProjectReport";
 
 const Index = () => {
   return (
@@ -46,6 +47,7 @@ const Index = () => {
 
           <URLAnalyzer />
           <PhishingTypes />
+          <ProjectReport />
 
           {/* Footer */}
           <footer className="max-w-3xl mx-auto mt-16 pt-6 border-t border-border text-center">
