@@ -47,6 +47,7 @@ const Index = () => {
 
           <URLAnalyzer />
           <PhishingTypes />
+          <ProjectReport />
 
           {/* Footer */}
           <footer className="max-w-3xl mx-auto mt-16 pt-6 border-t border-border text-center">
