@@ -8,6 +8,7 @@ const URLAnalyzer = () => {
   const [result, setResult] = useState<AnalysisResult | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [livePreview, setLivePreview] = useState<AnalysisResult | null>(null);
+  const [showBarChart, setShowBarChart] = useState(false);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Live preview as user types
