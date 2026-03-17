@@ -1,11 +1,13 @@
 import { useState } from "react";
-import { Search, CheckCircle, AlertTriangle, XCircle } from "lucide-react";
+import { Search, CheckCircle, AlertTriangle, XCircle, PieChart as PieChartIcon } from "lucide-react";
 import { PHISHING_TYPES, analyzeByType, THREAT_TYPE_LABELS, type AnalysisResult } from "@/lib/phishing-engine";
+import SubtypePieChart from "@/components/SubtypePieChart";
 
 const PhishingTypes = () => {
   const [inputs, setInputs] = useState<Record<number, string>>({});
   const [results, setResults] = useState<Record<number, AnalysisResult>>({});
   const [analyzing, setAnalyzing] = useState<Record<number, boolean>>({});
+  const [showPie, setShowPie] = useState<Record<number, boolean>>({});
 
   const handleAnalyze = (type: typeof PHISHING_TYPES[0]) => {
     const input = inputs[type.id]?.trim();
@@ -64,6 +66,24 @@ const PhishingTypes = () => {
                 <span className="font-semibold">Prevention: </span>
                 {type.prevention}
               </p>
+
+              {/* Pie chart toggle */}
+              <div className="mt-2 mb-3">
+                <button
+                  onClick={() => setShowPie(prev => ({ ...prev, [type.id]: !prev[type.id] }))}
+                  className="flex items-center gap-1.5 text-primary font-mono text-[10px] px-2.5 py-1.5 rounded-md border border-primary/20 bg-primary/5 hover:bg-primary/15 transition-colors"
+                >
+                  <PieChartIcon className="w-3 h-3" />
+                  {showPie[type.id] ? "Hide Stats" : "View Stats"}
+                </button>
+              </div>
+
+              {showPie[type.id] && (
+                <SubtypePieChart
+                  threatType={type.threatType}
+                  onClose={() => setShowPie(prev => ({ ...prev, [type.id]: false }))}
+                />
+              )}
 
               {/* Per-type input */}
               <div className="mt-auto pt-3 border-t border-border">

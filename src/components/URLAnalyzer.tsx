@@ -1,12 +1,14 @@
 import { useState, useEffect, useRef } from "react";
-import { Shield, Search, AlertTriangle, CheckCircle, XCircle } from "lucide-react";
+import { Shield, Search, AlertTriangle, CheckCircle, XCircle, BarChart3 } from "lucide-react";
 import { analyzeURL, detectThreatType, THREAT_TYPE_LABELS, type AnalysisResult } from "@/lib/phishing-engine";
+import ThreatBarChart from "@/components/ThreatBarChart";
 
 const URLAnalyzer = () => {
   const [url, setUrl] = useState("");
   const [result, setResult] = useState<AnalysisResult | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [livePreview, setLivePreview] = useState<AnalysisResult | null>(null);
+  const [showBarChart, setShowBarChart] = useState(false);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Live preview as user types
@@ -185,6 +187,19 @@ const URLAnalyzer = () => {
             <p className="text-xs text-muted-foreground font-mono mb-1">Analyzed Input:</p>
             <p className="font-mono text-sm text-foreground break-all">{result.url}</p>
           </div>
+
+          {/* Stats button */}
+          <div className="mb-4">
+            <button
+              onClick={() => setShowBarChart(!showBarChart)}
+              className="flex items-center gap-2 bg-primary/10 text-primary font-mono text-xs px-4 py-2 rounded-md border border-primary/20 hover:bg-primary/20 transition-colors"
+            >
+              <BarChart3 className="w-4 h-4" />
+              {showBarChart ? "Hide Threat Stats" : "View Threat Stats (2022–2024)"}
+            </button>
+          </div>
+
+          {showBarChart && <ThreatBarChart onClose={() => setShowBarChart(false)} />}
 
           {/* Rules */}
           <h4 className="font-mono text-xs text-primary uppercase tracking-wider mb-3">
