@@ -7,6 +7,7 @@ const PhishingTypes = () => {
   const [inputs, setInputs] = useState<Record<number, string>>({});
   const [results, setResults] = useState<Record<number, AnalysisResult>>({});
   const [analyzing, setAnalyzing] = useState<Record<number, boolean>>({});
+  const [showPie, setShowPie] = useState<Record<number, boolean>>({});
 
   const handleAnalyze = (type: typeof PHISHING_TYPES[0]) => {
     const input = inputs[type.id]?.trim();
