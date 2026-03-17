@@ -1,6 +1,7 @@
 import { useState } from "react";
-import { Search, CheckCircle, AlertTriangle, XCircle } from "lucide-react";
+import { Search, CheckCircle, AlertTriangle, XCircle, PieChart as PieChartIcon } from "lucide-react";
 import { PHISHING_TYPES, analyzeByType, THREAT_TYPE_LABELS, type AnalysisResult } from "@/lib/phishing-engine";
+import SubtypePieChart from "@/components/SubtypePieChart";
 
 const PhishingTypes = () => {
   const [inputs, setInputs] = useState<Record<number, string>>({});
