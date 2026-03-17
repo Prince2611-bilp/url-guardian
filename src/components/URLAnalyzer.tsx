@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
-import { Shield, Search, AlertTriangle, CheckCircle, XCircle } from "lucide-react";
+import { Shield, Search, AlertTriangle, CheckCircle, XCircle, BarChart3 } from "lucide-react";
 import { analyzeURL, detectThreatType, THREAT_TYPE_LABELS, type AnalysisResult } from "@/lib/phishing-engine";
+import ThreatBarChart from "@/components/ThreatBarChart";
 
 const URLAnalyzer = () => {
   const [url, setUrl] = useState("");
