@@ -188,6 +188,19 @@ const URLAnalyzer = () => {
             <p className="font-mono text-sm text-foreground break-all">{result.url}</p>
           </div>
 
+          {/* Stats button */}
+          <div className="mb-4">
+            <button
+              onClick={() => setShowBarChart(!showBarChart)}
+              className="flex items-center gap-2 bg-primary/10 text-primary font-mono text-xs px-4 py-2 rounded-md border border-primary/20 hover:bg-primary/20 transition-colors"
+            >
+              <BarChart3 className="w-4 h-4" />
+              {showBarChart ? "Hide Threat Stats" : "View Threat Stats (2022–2024)"}
+            </button>
+          </div>
+
+          {showBarChart && <ThreatBarChart onClose={() => setShowBarChart(false)} />}
+
           {/* Rules */}
           <h4 className="font-mono text-xs text-primary uppercase tracking-wider mb-3">
             Security Rules ({result.rules.filter(r => r.triggered).length}/{result.rules.length} triggered)
